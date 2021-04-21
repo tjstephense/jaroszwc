@@ -27,14 +27,18 @@ function sendHttpRequest(method, url, post){
 }
 
 async function fetchData(){
-    const receivedData = await sendHttpRequest('GET', 'https://jsonplaceholder.typicode.com/posts')
-
-    for(const post of receivedData){
-        const postEl = document.importNode(postTemplate.content, true)
-        postEl.querySelector('h2').textContent = post.title.toUpperCase();
-        postEl.querySelector('p').textContent = post.body;
-        postEl.querySelector('li').id = post.id
-        listPost.append(postEl);
+    try{
+        const receivedData = await sendHttpRequest('GET', 'https://jsonplaceholder.typicode.com/posts')
+    
+        for(const post of receivedData){
+            const postEl = document.importNode(postTemplate.content, true)
+            postEl.querySelector('h2').textContent = post.title.toUpperCase();
+            postEl.querySelector('p').textContent = post.body;
+            postEl.querySelector('li').id = post.id
+            listPost.append(postEl);
+        }
+    } catch(err){
+        alert(err.message)
     }
 }
 
