@@ -4,30 +4,55 @@ const fetchDataBtn = document.querySelector('#fetch');
 const addDataForm = document.querySelector('form')
 
 
-function sendHttpRequest(method, url, post){
-    const promise = new Promise((resolve, reject) => {
+function sendHttpRequest(method, url, data){
+    // const promise = new Promise((resolve, reject) => {
         
-        const xhr = new XMLHttpRequest();
-        xhr.open(method, url);
-        xhr.onload = function(){
-            if(xhr.status >= 200 && xhr.status < 300){
-                resolve(xhr.response)
-            } else {
-                reject(new Error('Something went wrong'))
-            };
-        }
+        // const xhr = new XMLHttpRequest();
+        // xhr.setRequestHeader('Content-Type', 'application/json')
+    //     xhr.open(method, url);
+    //     xhr.onload = function(){
+    //         if(xhr.status >= 200 && xhr.status < 300){
+    //             resolve(xhr.response)
+    //         } else {
+                    // xhr.response;
+    //             reject(new Error('Something went wrong'))
+    //         };
+    //     }
             
-        xhr.responseType = 'json';
-        xhr.send(JSON.stringify(post))
-        xhr.onerror = function(){
-            reject(new Error('Failed to send request'))
-        }
-    }) 
-    return promise;
+    //     xhr.responseType = 'json';
+    //     xhr.send(JSON.stringify(post))
+    //     xhr.onerror = function(){
+    //         reject(new Error('Failed to send request'))
+    //     }
+    // }) 
+
+    return fetch(url, {
+        method: method,
+        body: data,
+        // body: JSON.stringify(data),
+        // headers: {
+        //     'Content-Type': 'application/json'
+        // }        
+    })
+        .then(response => {
+            if(response.status >= 200 && response.status <300){
+                return response.json()
+            } else {
+                return response.json().then(errData => {
+                    console.log(errData)
+                    throw new Error ('Something wrogn - server side')
+                });
+            }
+        })
+        .catch(err => {
+            console.log(err)
+            throw new Error('Something went wrong!')
+        })
+
 }
 
 async function fetchData(){
-    try{
+    try {
         const receivedData = await sendHttpRequest('GET', 'https://jsonplaceholder.typicode.com/posts')
     
         for(const post of receivedData){
@@ -45,17 +70,19 @@ async function fetchData(){
 fetchDataBtn.addEventListener('click', fetchData);
 
 async function sendData(title, content){
-    try{
-        const userId = Math.random();
-        post = {
-            userId: userId,
-            title: title, 
-            body: content
-        }
-        await sendHttpRequest('POST', 'https://jsonplaceholder.typicode.com/posts', post)
-    } catch(err){
-        alert(err.mesage)
-    }
+    const userId = Math.random();
+    post = {
+        userId: userId,
+        title: title, 
+        body: content
+    };
+
+    const fd = new FormData(addDataForm);
+    // fd.append('title:', title);
+    // fd.append('body:', content);
+    fd.append('userId:', userId);
+
+    await sendHttpRequest('POST', 'https://jsonplaceholder.typicode.com/posts', fd)
 }
 
 addDataForm.addEventListener('submit', (e) => {
@@ -76,3 +103,28 @@ document.querySelector('ul').addEventListener('click', (e) => {
         e.target.parentElement.remove();
     }
 })
+
+
+
+
+    // return fetch(url, {
+    //     method: method,
+    //     body: JSON.stringify(post),
+    //     headers: {
+    //         'Content-Type': 'application/json'
+    //     }
+    // })
+    // .then(response => {
+    //     if(response.status >= 200 && response.status < 300){
+    //         return response.json()
+    //     } else {
+    //         return response.json().then(errData => {
+    //             console.log(errData)
+    //             throw new Error('Something went wrong - server-side');
+    //         });
+    //     }
+    // })
+    // .catch(err => {
+    //     console.log(err);
+    //     throw new Error('Something went wrong')
+    // })
